@@ -45,6 +45,19 @@ module.exports = {
     // 模块
     rules: [
       {
+        // 给js代码配置规则
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'eslint-loader',
+            options: {
+              enforce: 'pre', // pre前置 normal普通 post后面  因为loader是从下往上执行的，加了这个属性能修改执行的顺序
+            },
+          },
+        ],
+      },
+      {
         test: /\.js$/,
         use: [
           {
@@ -59,11 +72,13 @@ module.exports = {
                 // https://babeljs.io/docs/en/babel-plugin-proposal-decorators
                 ['@babel/plugin-proposal-decorators', { legacy: true }],
                 ['@babel/plugin-proposal-class-properties', { loose: true }],
+                '@babel/plugin-transform-runtime', // 允许重用Babel注入的帮助代码以节省编码的插件。
               ],
-              // plugins: ['@babel/plugin-proposal-class-properties']
             },
           },
         ],
+        include: path.resolve(__dirname, 'src'), // 只是处理src下面的目录
+        exclude: /node_modules/, // 排除处理的目录
       },
       // 规则
       // css-loader 用来处理@import 这用语法的
@@ -98,3 +113,5 @@ module.exports = {
 // 配置webpack 打包时的命令，但是这里不需要npx webpack 这里可以自动在node_module 下面找个这个命令找到这个文件
 //  对js文件进行解析转化 babel-loader @babel/core @babel/preset-env(转化所有的js语法)
 // 这个插件转换静态类属性以及用属性初始化器语法声明的属性 @babel/plugin-proposal-class-properties
+//  @babel/runtime 生产依赖 给生产环境中注入脚本
+// @babel/polyfill

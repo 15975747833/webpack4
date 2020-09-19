@@ -1,6 +1,7 @@
 // import './a.js';
 // import './index.css';
 import './index.css';
+require('@babel/polyfill'); // polyfill 相当于补丁 给浏览器打补丁，让低版本的浏览器支持高级的语法 generator promise等等
 console.log(1112);
 const fn = () => {
   console.log('ES6');
@@ -16,3 +17,7 @@ console.log('class');
 function log(target) {
   console.log(target); // new A()
 }
+function* gen() {
+  yield 1;
+}
+console.log(gen().next());
