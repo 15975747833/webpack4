@@ -2,10 +2,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 将打包后的文件 插入到html中
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 将css打包成 link标签 ，之前通过module规则匹配出来的将css变成style标签
-const OptimizeCss= require('optimize-css-assets-webpack-plugin'); // 将css文件进行压缩
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin'); 
+const OptimizeCss = require('optimize-css-assets-webpack-plugin'); // 将css文件进行压缩
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
 module.exports = {
-  mode: 'production', // 环境 默认两种 production development
+  mode: 'development', // 环境 默认两种 production development 如果这里是开发模式，是不会走优化项的
   devServer: {
     // 开发服务器的配置
     port: '3003',
@@ -29,19 +30,41 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({ filename: 'main.css' }), // 将css打包成link标签 名称 main.css
   ], // 数组 存放所有webpack插件
-  optimization: { // 优化项
+  optimization: {
+    // 优化项
     minimizer: [
       new UglifyJsPlugin({
         cache: true, // 是否缓存
         parallel: true, // 使用多线程进行打包
-        sourceMap: true // 将错误信息映射到源码的模块 这个会降低打包的速度
+        sourceMap: true, // 将错误信息映射到源码的模块 这个会降低打包的速度
       }),
-      new OptimizeCss()
-    ] // 优化的内容可能是多个 所以这里是个数组
+      new OptimizeCss(),
+    ], // 优化的内容可能是多个 所以这里是个数组
   },
   module: {
     // 模块
     rules: [
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              // 用babel-loader将ES6 -> ES5
+              presets: ['@babel/preset-env'],
+              plugins: [
+                // 只有最外层的plugin模块才需要引用进来 然后new xxPlugin() 传入参数来进行使用
+                // 在module 里面的plugins 只需要写成数组的形式就可以了
+                // 后面的两个参数不能不写，这里是参考官网的配置方法
+                // https://babeljs.io/docs/en/babel-plugin-proposal-decorators
+                ['@babel/plugin-proposal-decorators', { legacy: true }],
+                ['@babel/plugin-proposal-class-properties', { loose: true }],
+              ],
+              // plugins: ['@babel/plugin-proposal-class-properties']
+            },
+          },
+        ],
+      },
       // 规则
       // css-loader 用来处理@import 这用语法的
       // css-loader 用来处理css文件 style-loader是用来将css文件插入到html中的head中
@@ -73,3 +96,5 @@ module.exports = {
 // 脚本配置 scripts: {"build": "webpack"}
 // 如果想在运行的时候才加上config参数 需要多加两个--  npm run build (-- 如果不加这两个--，运行脚本时会认为后面传入的参数是个字符串) --config webpack.config.js
 // 配置webpack 打包时的命令，但是这里不需要npx webpack 这里可以自动在node_module 下面找个这个命令找到这个文件
+//  对js文件进行解析转化 babel-loader @babel/core @babel/preset-env(转化所有的js语法)
+// 这个插件转换静态类属性以及用属性初始化器语法声明的属性 @babel/plugin-proposal-class-properties
