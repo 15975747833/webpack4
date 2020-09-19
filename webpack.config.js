@@ -2,7 +2,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 将打包后的文件 插入到html中
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 将css打包成 link标签 ，之前通过module规则匹配出来的将css变成style标签
-
+const OptimizeCss= require('optimize-css-assets-webpack-plugin'); // 将css文件进行压缩
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin'); 
 module.exports = {
   mode: 'production', // 环境 默认两种 production development
   devServer: {
@@ -28,6 +29,16 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({ filename: 'main.css' }), // 将css打包成link标签 名称 main.css
   ], // 数组 存放所有webpack插件
+  optimization: { // 优化项
+    minimizer: [
+      new UglifyJsPlugin({
+        cache: true, // 是否缓存
+        parallel: true, // 使用多线程进行打包
+        sourceMap: true // 将错误信息映射到源码的模块 这个会降低打包的速度
+      }),
+      new OptimizeCss()
+    ] // 优化的内容可能是多个 所以这里是个数组
+  },
   module: {
     // 模块
     rules: [
@@ -42,7 +53,7 @@ module.exports = {
         use: [
           // {
           //   loader: 'style-loader',
-          //   // options: { insertAt: 'top' }, // style放的位置
+          //   // options: { insertAt: 'top' }, // style放的位置 放在style标签里
           // },
           MiniCssExtractPlugin.loader,
           'css-loader',
