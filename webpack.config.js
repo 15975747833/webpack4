@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin'); // 将打包后的文�
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 将css打包成 link标签 ，之前通过module规则匹配出来的将css变成style标签
 const OptimizeCss = require('optimize-css-assets-webpack-plugin'); // 将css文件进行压缩
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-
+const Webpack = require('webpack'); // webpack也是个插件
 module.exports = {
   mode: 'development', // 环境 默认两种 production development 如果这里是开发模式，是不会走优化项的
   devServer: {
@@ -20,6 +20,9 @@ module.exports = {
     // path 是基于node的基础模块 需要使用require 引用进来
     path: path.resolve(__dirname, 'build'), // __dirname 在当前目录下创建，
   },
+  // externals: { // 不打包 
+  //   jquery: '$'
+  // },
   plugins: [
     // plugins 千万不要漏了s
     new HtmlWebpackPlugin({
@@ -29,6 +32,9 @@ module.exports = {
       hash: true,
     }),
     new MiniCssExtractPlugin({ filename: 'main.css' }), // 将css打包成link标签 名称 main.css
+    new Webpack.ProvidePlugin({
+      '$': 'jquery', // 一个全局
+    })
   ], // 数组 存放所有webpack插件
   optimization: {
     // 优化项
@@ -44,6 +50,13 @@ module.exports = {
   module: {
     // 模块
     rules: [
+      {
+        test: require.resolve('jquery'), // 这里的require.resolve 是node的调用(用来获取模块的绝对路径) 与webpack的require.resolve处理流程无关
+        use: [{
+          loader: 'expose-loader',
+          options: {exposes: '$'} // 如果不想这么配置，可以给每个模块都注入一个$
+        }]
+      },
       {
         // 给js代码配置规则
         test: /\.js$/,
