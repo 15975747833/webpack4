@@ -126,5 +126,14 @@ module.exports = {
 // 配置webpack 打包时的命令，但是这里不需要npx webpack 这里可以自动在node_module 下面找个这个命令找到这个文件
 //  对js文件进行解析转化 babel-loader @babel/core @babel/preset-env(转化所有的js语法)
 // 这个插件转换静态类属性以及用属性初始化器语法声明的属性 @babel/plugin-proposal-class-properties
-//  @babel/runtime 生产依赖 给生产环境中注入脚本
+// @babel/runtime 生产依赖 给生产环境中注入脚本
 // @babel/polyfill
+
+// ! require.resolve() 解析
+/**
+ * require.resolve(request[, options])
+ * request <string> 需要解析的模块路径。返回的是这个文件的相对路径 
+ * option <Object>
+ *  - path<string[]> 从中解析模块位置的路径。这意味着从该位置开始检查 node_modules 层次结构。
+ * 使用内部的 require() 机制查询模块的位置，此操作只返回解析后的文件名，不会加载该模块。
+ */
